@@ -1,11 +1,11 @@
-#
+# frozen_string_literal: true
 
 require 'telegram/bot'
 require 'net/http'
 require 'json'
 
 class TicketBot
-  TOKEN = ENV['TICKET_BOT_TOKEN']
+  TOKEN = ENV['TICKET_BOT_TOKEN'] || '1119744734:AAG4ovz6aEQ5POvJJ_Q_4BTlfchkTIqTCr4'
   API_HOST = 'http://localhost:4567/api/public/v1'
 
   def run
@@ -31,7 +31,9 @@ class TicketBot
     when /start/i
       @bot.api.send_message(
         chat_id: message.chat.id,
-        text: "Hi, #{message.from.first_name}!",
+        text: "Hi, #{message.from.first_name}!\n" \
+              "I'm railway tickets bot.\n" \
+              "You can check available routes and buy tickets for them",
         reply_markup: @markup
         )
     when /,\s*/
@@ -65,24 +67,25 @@ class TicketBot
       @bot.api.send_message(
         chat_id: message.from.id,
         text: "Write down data in following format:\n" \
-              "First name, Last name, Birth Date, Passport No., Trip Date Time, Route Name"
+              "First name, Last name, Birth Date, Passport No., Trip Date Time (DD.MM.YYYY HH:MM), Route Name"
         )
     when 'timetable'
-      timetable = get_request("#{API_HOST}/timetables")
-      text = timetable.each_with_object(''){ |timetable, memo| memo << "#{timetable['route']}, #{timetable['date']}\n" }
+      timetables = get_request("#{API_HOST}/timetables")
+      text = timetables.map { |hash| hash.map { |k, v| v }.join(', ') }.join("\n")
       @bot.api.send_message(
         chat_id: message.from.id,
         text: text,
         reply_markup: @markup
-        )
+        ) unless text.empty?
     when 'my_tickets'
       tickets = get_request("#{API_HOST}/tickets/user/#{message.from.id}")
-      text = tickets.each_with_object(''){ |ticket, memo| memo << "#{ticket['passenger_name']}, #{ticket['route']}, #{ticket['date']}\n" }
+      text = tickets.map { |hash| hash.map { |k, v| v }.join(', ') }.join("\n")
       @bot.api.send_message(
         chat_id: message.from.id,
         text: text,
         reply_markup: @markup
-        )
+        ) unless text.empty?
+      when 'my_tickets'
     else
       @bot.api.send_message(chat_id: message.from.id, text: 'Bye!')
     end
@@ -126,3 +129,5 @@ class TicketBot
     @http.use_ssl = true if uri.instance_of?(URI::HTTPS)
   end
 end
+
+TicketBot.new.run
