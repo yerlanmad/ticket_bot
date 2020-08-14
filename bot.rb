@@ -5,7 +5,7 @@ require 'net/http'
 require 'json'
 
 class TicketBot
-  TOKEN = ENV['TICKET_BOT_TOKEN'] || '1119744734:AAG4ovz6aEQ5POvJJ_Q_4BTlfchkTIqTCr4'
+  TOKEN = ENV['TICKET_BOT_TOKEN']
   API_HOST = 'http://localhost:4567/api/public/v1'
 
   def run
