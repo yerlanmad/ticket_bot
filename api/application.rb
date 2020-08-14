@@ -4,8 +4,6 @@ require 'sinatra/base'
 require 'sinatra/namespace'
 require 'json'
 require 'mongoid'
-require_relative '../bot'
-
 
 Dir['./errors/*.rb'].sort.each { |file| require file }
 Dir['./models/*.rb'].sort.each { |file| require file }
